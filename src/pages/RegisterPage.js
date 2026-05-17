@@ -24,7 +24,7 @@ export default function RegisterPage({ onBack }) {
     e.preventDefault();
     const { nombre, email, password, confirmPassword, nivel, grado, seccion } = form;
 
-    if (!nombre || !email || !password || !confirmPassword || !nivel || !grado || !seccion) {
+    if (!form.nombre || !form.email || !form.password || !form.confirmPassword || !form.nivel || !form.grado) {
       setError('Please fill in all fields.'); return;
     }
     if (!email.includes('@') || !email.includes('.')) {
