@@ -152,12 +152,13 @@ export default function RegisterPage({ onBack }) {
         </button>
       </form>
 
+     
       <div style={{ textAlign: 'center', marginTop: 20 }}>
         <button
           onClick={onBack}
           style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--gray-500)', textDecoration: 'underline' }}
         >
-          Already have an account? Sign in
+          xd
         </button>
       </div>
     </div>
