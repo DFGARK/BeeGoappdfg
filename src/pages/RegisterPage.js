@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useApp } from '../lib/AppContext';
 
-const LEVELS = ['BYS', 'HS'];
+const LEVELS = ['BYS', 'HS', 'Maestros'];
 const GRADES_BY_LEVEL = {
   BYS: ['7', '8', '9', '10', '11'],
   HS:  ['7', '8', '9', '10', '11'],
+  Maestros:['XD'],
 };
 
 export default function RegisterPage({ onBack }) {
@@ -56,7 +57,6 @@ export default function RegisterPage({ onBack }) {
         email: form.email,
         usuario,
         password_hash: form.password,
-        nivel: form.nivel,
         grado: form.grado,
         seccion: 'A',
         activo: true,
