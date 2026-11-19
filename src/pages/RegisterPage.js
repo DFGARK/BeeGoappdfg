@@ -6,7 +6,7 @@ const LEVELS = ['BYS', 'HS', 'Maestros'];
 const GRADES_BY_LEVEL = {
   BYS: ['7', '8', '9', '10', '11'],
   HS:  ['7', '8', '9', '10', '11'],
-  Maestros:['XD'],
+  Maestros: ['Maestro'],
 };
 
 export default function RegisterPage({ onBack }) {
@@ -50,23 +50,42 @@ export default function RegisterPage({ onBack }) {
       setError('An account with that email already exists.'); setLoading(false); return;
     }
 
-    const { data, error: err } = await supabase
+    const newStudent = {
+      nombre: form.nombre,
+      email: form.email,
+      usuario,
+      password_hash: form.password,
+      nivel: form.nivel,
+      grado: form.grado,
+      seccion: 'A',
+      activo: true,
+    };
+
+    let { data, error: err } = await supabase
       .from('students')
-      .insert([{
-        nombre: form.nombre,
-        email: form.email,
-        usuario,
-        password_hash: form.password,
-        grado: form.grado,
-        seccion: 'A',
-        activo: true,
-      }])
+      .insert([newStudent])
       .select()
       .single();
 
+    // If the database rejects the "nivel" value (e.g. the column doesn't exist
+    // or doesn't allow "Maestros" yet), retry without it so sign-up still works.
+    if (err) {
+      console.error('Register with nivel failed, retrying without it:', err);
+      const { nivel, ...withoutNivel } = newStudent;
+      ({ data, error: err } = await supabase
+        .from('students')
+        .insert([withoutNivel])
+        .select()
+        .single());
+    }
+
     setLoading(false);
 
-    if (err) { setError('Could not create account. Please try again.'); return; }
+    if (err) {
+      console.error('Register failed:', err);
+      setError('Could not create account. Please try again.');
+      return;
+    }
     setStudent(data);
   };
 
@@ -98,11 +117,11 @@ export default function RegisterPage({ onBack }) {
 
         <div className="form-group">
           <label className="form-label">Level</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
             {LEVELS.map(lvl => (
               <button
                 key={lvl} type="button"
-                onClick={() => { set('nivel', lvl); set('grado', ''); }}
+                onClick={() => { set('nivel', lvl); set('grado', GRADES_BY_LEVEL[lvl].length === 1 ? GRADES_BY_LEVEL[lvl][0] : ''); }}
                 style={{
                   padding: '12px',
                   borderRadius: 'var(--radius-sm)',
@@ -117,11 +136,11 @@ export default function RegisterPage({ onBack }) {
             ))}
           </div>
           <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 5 }}>
-            Only for BYS
+            BYS / HS students, or Maestros for teachers
           </p>
         </div>
 
-        {form.nivel && (
+        {form.nivel && grades.length > 1 && (
           <div className="form-group">
             <label className="form-label">Grade</label>
             <select className="form-select" value={form.grado} onChange={e => set('grado', e.target.value)}>
